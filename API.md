@@ -22,6 +22,10 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 
 - 分页：`page`（默认 1）、`size`（默认 50）；`total` 为符合条件的总数。
 
+> **定位 ID**：调用方/AI 通常只知道客服名或客户名/手机号，不知道 `csrId` / `contactId`。
+> 先用 `GET /openapi/csrs?keyword=张三` 或 `GET /openapi/contacts?keyword=138xxxx` 搜出来拿到 id，
+> 再传给其它接口（replies / messages 的 `csrId` / `contactId`）。
+
 ---
 
 ## 1. 回复明细 `GET /openapi/replies`
@@ -97,6 +101,7 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | csrId | long | 否 | 分配客服 |
+| keyword | string | 否 | 模糊匹配 昵称(nickName)/备注(username)/手机号(phoneNumber) |
 | stage | string | 否 | stage_key 过滤，逗号分隔，包含其一即匹配 |
 | userArea | string | 否 | 国家地区代码，如 CN |
 | startTime | long | 否 | firstSeen >= 毫秒时间戳 |
@@ -125,3 +130,59 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 | tiktokNickname | TikTok 昵称 |
 | summaryContent | 会话总结 |
 | summaryAt | 总结生成时间（毫秒） |
+
+---
+
+## 4. 客户详情 `GET /openapi/contacts/{id}`
+
+按 contactId 取单个客户，返回字段同上面客户明细的单行（`data` 为对象，非数组）。
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| id | long | 是 | 路径参数，客户ID |
+| lang | string | 否 | `cn`（默认）/ `en` |
+
+客户不存在时返回 `{ "code": 500203, "msg": "客户不存在" }`。
+
+---
+
+## 5. 客服列表 / 搜索 `GET /openapi/csrs`
+
+数据来源：`tb_csr`，已脱敏（不含密码 / token salt）。用于按名字等定位 `csrId`。
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| keyword | string | 否 | 模糊匹配 name/account/phone/email |
+| status | int | 否 | 0=禁用 / 1=启用 |
+| page / size | int | 否 | 分页 |
+
+返回 `data[]` 字段：
+
+| 字段 | 说明 |
+|------|------|
+| id | 客服ID（即各接口的 csrId） |
+| account | 登录账号 |
+| name | 姓名/昵称 |
+| phone | 手机号 |
+| email | 邮箱 |
+| status | 0=禁用 / 1=启用 |
+| isDefault | 是否默认客服 |
+| manage | 是否管理员 |
+| allowAutopilot | 是否允许 Autopilot |
+| wecomUserid / wecomNotify | 企微 userid / 通知开关 |
+| feishuUserid / feishuNotify | 飞书 user_id / 通知开关 |
+| larkUserid / larkNotify | Lark user_id / 通知开关 |
+| remark | 备注 |
+| createdAt | 创建时间（毫秒） |
+
+---
+
+## 6. 客服详情 `GET /openapi/csrs/{id}`
+
+按 csrId 取单个客服，返回字段同上面客服列表的单行（`data` 为对象）。
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| id | long | 是 | 路径参数，客服ID |
+
+客服不存在时返回 `{ "code": 500203, "msg": "客服不存在" }`。

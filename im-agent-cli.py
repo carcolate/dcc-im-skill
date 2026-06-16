@@ -69,12 +69,28 @@ def cmd_messages(args):
 def cmd_contacts(args):
     client = ApiClient()
     res = tools.query_contacts(
-        client, csr_id=args.csr, stage=args.stage, user_area=args.area,
+        client, csr_id=args.csr, keyword=args.keyword, stage=args.stage, user_area=args.area,
         start_time=_ts(args.start), end_time=_ts(args.end),
         last_seen_after=_ts(args.last_seen_after), lang=args.lang,
         page=args.page, size=args.size,
     )
     _print(res)
+
+
+def cmd_contact(args):
+    client = ApiClient()
+    _print(tools.get_contact(client, contact_id=args.id, lang=args.lang))
+
+
+def cmd_csrs(args):
+    client = ApiClient()
+    _print(tools.query_csrs(client, keyword=args.keyword, status=args.status,
+                            page=args.page, size=args.size))
+
+
+def cmd_csr(args):
+    client = ApiClient()
+    _print(tools.get_csr(client, csr_id=args.id))
 
 
 def build_parser():
@@ -106,8 +122,9 @@ def build_parser():
     sp.add_argument("--size", type=int, default=50)
     sp.set_defaults(func=cmd_messages)
 
-    sp = sub.add_parser("contacts", help="客户明细")
+    sp = sub.add_parser("contacts", help="客户明细 / 搜索")
     sp.add_argument("--csr", type=int, help="分配客服 csrId")
+    sp.add_argument("--keyword", help="模糊匹配 昵称/备注/手机号")
     sp.add_argument("--stage", help="stage_key 逗号分隔")
     sp.add_argument("--area", help="国家地区代码，如 CN")
     sp.add_argument("--start", help="firstSeen >= （时间戳或 yyyy-MM-dd HH:mm）")
@@ -117,6 +134,22 @@ def build_parser():
     sp.add_argument("--page", type=int, default=1)
     sp.add_argument("--size", type=int, default=50)
     sp.set_defaults(func=cmd_contacts)
+
+    sp = sub.add_parser("contact", help="按 contactId 取客户详情")
+    sp.add_argument("id", type=int, help="客户ID")
+    sp.add_argument("--lang", default="cn", help="cn / en，影响 stageNames")
+    sp.set_defaults(func=cmd_contact)
+
+    sp = sub.add_parser("csrs", help="客服列表 / 搜索（定位 csrId）")
+    sp.add_argument("--keyword", help="模糊匹配 name/account/phone/email")
+    sp.add_argument("--status", type=int, help="0=禁用 1=启用")
+    sp.add_argument("--page", type=int, default=1)
+    sp.add_argument("--size", type=int, default=50)
+    sp.set_defaults(func=cmd_csrs)
+
+    sp = sub.add_parser("csr", help="按 csrId 取客服信息")
+    sp.add_argument("id", type=int, help="客服ID")
+    sp.set_defaults(func=cmd_csr)
 
     return p
 

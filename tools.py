@@ -72,14 +72,17 @@ def query_messages(client: ApiClient, start_time: int, end_time: int,
     return client.get("/openapi/messages", params)
 
 
-def query_contacts(client: ApiClient, csr_id: Optional[int] = None, stage: Optional[str] = None,
-                   user_area: Optional[str] = None, start_time: Optional[int] = None,
-                   end_time: Optional[int] = None, last_seen_after: Optional[int] = None,
-                   lang: str = "cn", page: int = 1, size: int = 50):
-    """客户明细。时间参数为毫秒时间戳（均选填）。"""
+def query_contacts(client: ApiClient, csr_id: Optional[int] = None, keyword: Optional[str] = None,
+                   stage: Optional[str] = None, user_area: Optional[str] = None,
+                   start_time: Optional[int] = None, end_time: Optional[int] = None,
+                   last_seen_after: Optional[int] = None, lang: str = "cn",
+                   page: int = 1, size: int = 50):
+    """客户明细 / 搜索。keyword 模糊匹配昵称/备注/手机号。时间参数为毫秒时间戳（均选填）。"""
     params = {"lang": lang, "page": page, "size": size}
     if csr_id is not None:
         params["csrId"] = csr_id
+    if keyword:
+        params["keyword"] = keyword
     if stage:
         params["stage"] = stage
     if user_area:
@@ -91,3 +94,24 @@ def query_contacts(client: ApiClient, csr_id: Optional[int] = None, stage: Optio
     if last_seen_after is not None:
         params["lastSeenAfter"] = last_seen_after
     return client.get("/openapi/contacts", params)
+
+
+def get_contact(client: ApiClient, contact_id: int, lang: str = "cn"):
+    """按 contactId 取单个客户详情。"""
+    return client.get(f"/openapi/contacts/{contact_id}", {"lang": lang})
+
+
+def query_csrs(client: ApiClient, keyword: Optional[str] = None, status: Optional[int] = None,
+               page: int = 1, size: int = 50):
+    """客服列表 / 搜索。keyword 模糊匹配 name/account/phone/email，用于定位 csrId。"""
+    params = {"page": page, "size": size}
+    if keyword:
+        params["keyword"] = keyword
+    if status is not None:
+        params["status"] = status
+    return client.get("/openapi/csrs", params)
+
+
+def get_csr(client: ApiClient, csr_id: int):
+    """按 csrId 取单个客服信息（已脱敏）。"""
+    return client.get(f"/openapi/csrs/{csr_id}", {})
