@@ -1,6 +1,6 @@
 ---
 name: im-cli
-description: 通过命令行查询 Carcolate-IM 开放接口（回复明细 / 消息时效 / 客户明细）。当需要按时间段、按客服、按客户、按标签拉取 IM 业务数据做统计分析时使用。内置时间字符串转毫秒时间戳工具。
+description: 通过命令行查询 Carcolate-IM 开放接口（回复明细 / 消息时效 / 完整来往消息 / 客户明细 / 客服）。当需要按时间段、按客服、按客户、按标签拉取 IM 业务数据做统计分析或还原完整对话时使用。内置时间字符串转毫秒时间戳工具。
 ---
 
 # im-cli
@@ -48,6 +48,9 @@ python im-agent-cli.py replies --start "2026-06-01 00:00" --end "2026-06-16 23:5
 # 消息明细（回复时效原始数据），只看某客户已回复的 inbound
 python im-agent-cli.py messages --start "2026-06-01 00:00" --end "2026-06-16 23:59" --direction inbound --has-reply true
 
+# 完整来往消息（inbound+outbound 对话流），取单个客户的完整对话
+python im-agent-cli.py conversations --start "2026-06-01 00:00" --end "2026-06-16 23:59" --contact 100023
+
 # 客户明细，按标签 + 地区 + 初次联系时间过滤
 python im-agent-cli.py contacts --stage ice_breaking,deal --area CN --start "2026-01-01 00:00" --lang cn
 ```
@@ -59,6 +62,7 @@ python im-agent-cli.py contacts --stage ice_breaking,deal --area CN --start "202
 - `query_csrs(...)` / `get_csr(id)`：搜索客服 / 取客服详情（定位 csrId）
 - `query_contacts(...)` / `get_contact(id)`：搜索客户 / 取客户详情（定位 contactId，`query_contacts` 支持 `keyword`）
 - `query_replies(...)` / `query_messages(...)`：回复明细 / 消息时效原始数据
+- `query_conversations(...)`：完整来往消息（inbound+outbound 对话流，含正文/媒体/copilot 痕迹）
 
 ## 指标计算提示
 

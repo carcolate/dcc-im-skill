@@ -2,10 +2,11 @@
 """im-cli：对接 Carcolate-IM OpenAPI 的命令行工具。
 
 子命令：
-  ts        把 'yyyy-MM-dd HH:mm' 转成毫秒时间戳
-  replies   查询回复明细
-  messages  查询消息明细（回复时效原始数据）
-  contacts  查询客户明细
+  ts            把 'yyyy-MM-dd HH:mm' 转成毫秒时间戳
+  replies       查询回复明细
+  messages      查询消息明细（回复时效原始数据）
+  conversations 查询完整来往消息（inbound+outbound 对话流）
+  contacts      查询客户明细
 
 时间参数同时支持毫秒时间戳（纯数字）和 'yyyy-MM-dd HH:mm' 字符串。
 """
@@ -66,6 +67,16 @@ def cmd_messages(args):
     _print(res)
 
 
+def cmd_conversations(args):
+    client = ApiClient()
+    res = tools.query_conversations(
+        client, start_time=_ts(args.start), end_time=_ts(args.end),
+        contact_id=args.contact, csr_id=args.csr, direction=args.direction,
+        page=args.page, size=args.size,
+    )
+    _print(res)
+
+
 def cmd_contacts(args):
     client = ApiClient()
     res = tools.query_contacts(
@@ -121,6 +132,16 @@ def build_parser():
     sp.add_argument("--page", type=int, default=1)
     sp.add_argument("--size", type=int, default=50)
     sp.set_defaults(func=cmd_messages)
+
+    sp = sub.add_parser("conversations", help="完整来往消息（inbound+outbound 对话流）")
+    sp.add_argument("--start", required=True, help="起始时间（时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--end", required=True, help="结束时间（时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--contact", type=int, help="客户ID（取单个客户完整对话）")
+    sp.add_argument("--csr", type=int, help="客服 csrId")
+    sp.add_argument("--direction", help="inbound / outbound")
+    sp.add_argument("--page", type=int, default=1)
+    sp.add_argument("--size", type=int, default=200)
+    sp.set_defaults(func=cmd_conversations)
 
     sp = sub.add_parser("contacts", help="客户明细 / 搜索")
     sp.add_argument("--csr", type=int, help="分配客服 csrId")

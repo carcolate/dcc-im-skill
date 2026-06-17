@@ -72,6 +72,21 @@ def query_messages(client: ApiClient, start_time: int, end_time: int,
     return client.get("/openapi/messages", params)
 
 
+def query_conversations(client: ApiClient, start_time: int, end_time: int,
+                        contact_id: Optional[int] = None, csr_id: Optional[int] = None,
+                        direction: Optional[str] = None, page: int = 1, size: int = 200):
+    """完整来往消息：按时间段拉取 inbound+outbound 完整对话流（含正文/媒体/copilot 痕迹），
+    按客户分组、时间升序。start_time/end_time 为毫秒时间戳（必填）。"""
+    params = {"startTime": start_time, "endTime": end_time, "page": page, "size": size}
+    if contact_id is not None:
+        params["contactId"] = contact_id
+    if csr_id is not None:
+        params["csrId"] = csr_id
+    if direction:
+        params["direction"] = direction
+    return client.get("/openapi/conversations", params)
+
+
 def query_contacts(client: ApiClient, csr_id: Optional[int] = None, keyword: Optional[str] = None,
                    stage: Optional[str] = None, user_area: Optional[str] = None,
                    start_time: Optional[int] = None, end_time: Optional[int] = None,

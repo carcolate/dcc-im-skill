@@ -30,7 +30,8 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 
 ## 1. 回复明细 `GET /openapi/replies`
 
-数据来源：`tb_wa_message` 中 `direction='outbound'`。
+数据来源：`tb_wa_message` 中 `direction='outbound'`（已发送的回复）**或** `copilot_accept_mode='REJECTED'` 的 inbound（被拒绝、未发送）。
+这样 ACCEPT/MODIFIED/MANUAL 来自 outbound，REJECTED（未发送）来自被拒绝的客户触发消息，互不重复。
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
@@ -49,11 +50,13 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 | contactId | 客户ID |
 | csrId | 回复人ID |
 | csrName | 回复人名 |
-| sendTime | 回复时间（毫秒） |
+| sendTime | 回复时间（毫秒；REJECTED 行为客户消息时间） |
 | acceptMode | 回复形式：`ACCEPT`=无修改发送 / `MODIFIED`=修改后发送 / `MANUAL`=手动编写 / `REJECTED`=未发送 |
 | msgType | 消息类型 |
+| direction | `outbound`=已发送回复 / `inbound`=被拒绝的客户触发消息 |
 | suggestionContent | 修改前内容（copilot 建议） |
-| sentContent | 修改后实际发送内容 |
+| sentContent | 实际发送内容（REJECTED 行为客户原文，无发送内容） |
+| taskUuid | copilot 任务 uuid（可关联同一次 copilot） |
 
 ---
 
@@ -86,11 +89,48 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 | repliedByCsrId | 回复该 inbound 的客服ID |
 | waitSeconds | 首次回复时长（秒）= repliedAt - sendTime |
 | textContent | 文本内容 |
+| acceptMode | copilot 回复形式（inbound 触发消息与 outbound 回复均带）：ACCEPT/MODIFIED/MANUAL/REJECTED |
+| suggestionContent | copilot 建议内容 |
+| taskUuid | copilot 任务 uuid |
 
 **指标算法**
 
 - 平均首次回复时长：一个自然日内，每个客户首条 inbound 的 `waitSeconds` 总和 / 已回复单聊数。
 - 已回复单聊占比：当天有 inbound 的客户中，`repliedAt` 非空的占比。
+
+---
+
+## 2.5 完整来往消息 `GET /openapi/conversations`
+
+数据来源：`tb_wa_message`，按时间段直接拉取 **inbound + outbound 完整对话流**（含正文 / 媒体 / copilot 痕迹），
+按 `contactId` 分组、`send_time` 升序，便于还原一段时间内的完整往来。与 `/openapi/messages` 区别：本接口面向"读对话"，字段更全（含正文、媒体、copilot 痕迹），默认 `size=200`。
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| startTime | long | 是 | 起始毫秒时间戳（按 send_time） |
+| endTime | long | 是 | 结束毫秒时间戳（按 send_time） |
+| contactId | long | 否 | 客户ID（取单个客户的完整对话） |
+| csrId | long | 否 | 客服 |
+| direction | string | 否 | `inbound` / `outbound` |
+| page / size | int | 否 | 分页（默认 size=200） |
+
+返回 `data[]` 字段：
+
+| 字段 | 说明 |
+|------|------|
+| id | 消息ID |
+| contactId | 客户ID |
+| direction | inbound / outbound |
+| msgType | 消息类型 |
+| csrId / csrName | 关联客服ID / 名 |
+| sendTime | 消息时间（毫秒） |
+| textContent | 文本内容 |
+| imgLink | 图片链接（如有） |
+| acceptMode | copilot 回复形式（ACCEPT/MODIFIED/MANUAL/REJECTED） |
+| suggestionContent | copilot 建议内容 |
+| taskUuid | copilot 任务 uuid |
+| repliedAt | inbound 被回复时间（毫秒） |
+| waitSeconds | 首次回复时长（秒） |
 
 ---
 
