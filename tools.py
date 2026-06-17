@@ -87,6 +87,20 @@ def query_conversations(client: ApiClient, start_time: int, end_time: int,
     return client.get("/openapi/conversations", params)
 
 
+def query_stage_logs(client: ApiClient, contact_id: Optional[int] = None,
+                     start_time: Optional[int] = None, end_time: Optional[int] = None,
+                     page: int = 1, size: int = 50):
+    """客户标签(stage)变更流水。带客户昵称；stageFrom/stageTo 为标签数组。时间为毫秒时间戳（均选填）。"""
+    params = {"page": page, "size": size}
+    if contact_id is not None:
+        params["contactId"] = contact_id
+    if start_time is not None:
+        params["startTime"] = start_time
+    if end_time is not None:
+        params["endTime"] = end_time
+    return client.get("/openapi/stage-logs", params)
+
+
 def query_contacts(client: ApiClient, csr_id: Optional[int] = None, keyword: Optional[str] = None,
                    stage: Optional[str] = None, user_area: Optional[str] = None,
                    start_time: Optional[int] = None, end_time: Optional[int] = None,

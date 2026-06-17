@@ -48,6 +48,8 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 |------|------|
 | id | 消息ID |
 | contactId | 客户ID |
+| nickName | 客户 WA 昵称 |
+| username | 客户系统备注 |
 | csrId | 回复人ID |
 | csrName | 回复人名 |
 | sendTime | 回复时间（毫秒；REJECTED 行为客户消息时间） |
@@ -80,6 +82,8 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 |------|------|
 | id | 消息ID |
 | contactId | 客户ID |
+| nickName | 客户 WA 昵称 |
+| username | 客户系统备注 |
 | direction | inbound / outbound |
 | msgType | 消息类型 |
 | csrId | 关联客服ID |
@@ -120,6 +124,8 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 |------|------|
 | id | 消息ID |
 | contactId | 客户ID |
+| nickName | 客户 WA 昵称 |
+| username | 客户系统备注 |
 | direction | inbound / outbound |
 | msgType | 消息类型 |
 | csrId / csrName | 关联客服ID / 名 |
@@ -131,6 +137,32 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 | taskUuid | copilot 任务 uuid |
 | repliedAt | inbound 被回复时间（毫秒） |
 | waitSeconds | 首次回复时长（秒） |
+
+---
+
+## 2.6 标签变更流水 `GET /openapi/stage-logs`
+
+数据来源：`tb_contact_stage_log`。客户跟踪标签(stage)每次变化记一条，便于追踪是哪条消息触发的标签变更。
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| contactId | long | 否 | 客户ID |
+| startTime | long | 否 | changedAt >= 毫秒时间戳 |
+| endTime | long | 否 | changedAt <= 毫秒时间戳 |
+| page / size | int | 否 | 分页 |
+
+返回 `data[]` 字段（按 changedAt 倒序）：
+
+| 字段 | 说明 |
+|------|------|
+| id | 流水ID |
+| contactId | 客户ID |
+| nickName | 客户 WA 昵称 |
+| username | 客户系统备注 |
+| messageId | 触发本次变更的消息ID（可能为 null） |
+| stageFrom | 变更前标签 stage_key 数组（首次为空数组） |
+| stageTo | 变更后标签 stage_key 数组 |
+| changedAt | 变更时间（毫秒） |
 
 ---
 

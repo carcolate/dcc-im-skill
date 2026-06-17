@@ -6,6 +6,7 @@
   replies       查询回复明细
   messages      查询消息明细（回复时效原始数据）
   conversations 查询完整来往消息（inbound+outbound 对话流）
+  stage-logs    查询客户标签(stage)变更流水
   contacts      查询客户明细
 
 时间参数同时支持毫秒时间戳（纯数字）和 'yyyy-MM-dd HH:mm' 字符串。
@@ -77,6 +78,15 @@ def cmd_conversations(args):
     _print(res)
 
 
+def cmd_stage_logs(args):
+    client = ApiClient()
+    res = tools.query_stage_logs(
+        client, contact_id=args.contact, start_time=_ts(args.start), end_time=_ts(args.end),
+        page=args.page, size=args.size,
+    )
+    _print(res)
+
+
 def cmd_contacts(args):
     client = ApiClient()
     res = tools.query_contacts(
@@ -142,6 +152,14 @@ def build_parser():
     sp.add_argument("--page", type=int, default=1)
     sp.add_argument("--size", type=int, default=200)
     sp.set_defaults(func=cmd_conversations)
+
+    sp = sub.add_parser("stage-logs", help="客户标签(stage)变更流水")
+    sp.add_argument("--contact", type=int, help="客户ID")
+    sp.add_argument("--start", help="changedAt >= （时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--end", help="changedAt <= （时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--page", type=int, default=1)
+    sp.add_argument("--size", type=int, default=50)
+    sp.set_defaults(func=cmd_stage_logs)
 
     sp = sub.add_parser("contacts", help="客户明细 / 搜索")
     sp.add_argument("--csr", type=int, help="分配客服 csrId")
