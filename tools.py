@@ -104,9 +104,14 @@ def query_stage_logs(client: ApiClient, contact_id: Optional[int] = None,
 def query_contacts(client: ApiClient, csr_id: Optional[int] = None, keyword: Optional[str] = None,
                    stage: Optional[str] = None, user_area: Optional[str] = None,
                    start_time: Optional[int] = None, end_time: Optional[int] = None,
-                   last_seen_after: Optional[int] = None, lang: str = "cn",
-                   page: int = 1, size: int = 50):
-    """客户明细 / 搜索。keyword 模糊匹配昵称/备注/手机号。时间参数为毫秒时间戳（均选填）。"""
+                   last_seen_start: Optional[int] = None, last_seen_end: Optional[int] = None,
+                   last_seen_after: Optional[int] = None,
+                   link_accounts: Optional[int] = None, contact_id: Optional[int] = None,
+                   nick_name: Optional[str] = None, summary_keyword: Optional[str] = None,
+                   lang: str = "cn", page: int = 1, size: int = 50):
+    """客户明细 / 搜索。keyword 模糊匹配昵称/备注/手机号。时间参数为毫秒时间戳（均选填）。
+    扩展参数：link_accounts(WA账号), contact_id(精确ID), nick_name(模糊昵称),
+    summary_keyword(会话总结关键字), last_seen_start/end(最后互动时间区间)。"""
     params = {"lang": lang, "page": page, "size": size}
     if csr_id is not None:
         params["csrId"] = csr_id
@@ -116,13 +121,65 @@ def query_contacts(client: ApiClient, csr_id: Optional[int] = None, keyword: Opt
         params["stage"] = stage
     if user_area:
         params["userArea"] = user_area
+    if link_accounts is not None:
+        params["linkAccounts"] = link_accounts
+    if contact_id is not None:
+        params["id"] = contact_id
+    if nick_name:
+        params["nickName"] = nick_name
+    if summary_keyword:
+        params["summaryKeyword"] = summary_keyword
     if start_time is not None:
         params["startTime"] = start_time
     if end_time is not None:
         params["endTime"] = end_time
+    if last_seen_start is not None:
+        params["lastSeenStart"] = last_seen_start
+    if last_seen_end is not None:
+        params["lastSeenEnd"] = last_seen_end
     if last_seen_after is not None:
         params["lastSeenAfter"] = last_seen_after
     return client.get("/openapi/contacts", params)
+
+
+def query_contact_distribution(client: ApiClient, csr_id: Optional[int] = None, keyword: Optional[str] = None,
+                               stage: Optional[str] = None, user_area: Optional[str] = None,
+                               start_time: Optional[int] = None, end_time: Optional[int] = None,
+                               last_seen_start: Optional[int] = None, last_seen_end: Optional[int] = None,
+                               last_seen_after: Optional[int] = None,
+                               link_accounts: Optional[int] = None, contact_id: Optional[int] = None,
+                               nick_name: Optional[str] = None, summary_keyword: Optional[str] = None,
+                               lang: str = "cn"):
+    """客户检索条件分布：对当前筛选命中的客户集合输出 stage/csr/area/needReply 四种饼图源数据。
+    入参与 query_contacts 相同（不接受 page/size），返回 {total, stage[], csr[], area[], needReply[]}。"""
+    params = {"lang": lang}
+    if csr_id is not None:
+        params["csrId"] = csr_id
+    if keyword:
+        params["keyword"] = keyword
+    if stage:
+        params["stage"] = stage
+    if user_area:
+        params["userArea"] = user_area
+    if link_accounts is not None:
+        params["linkAccounts"] = link_accounts
+    if contact_id is not None:
+        params["id"] = contact_id
+    if nick_name:
+        params["nickName"] = nick_name
+    if summary_keyword:
+        params["summaryKeyword"] = summary_keyword
+    if start_time is not None:
+        params["startTime"] = start_time
+    if end_time is not None:
+        params["endTime"] = end_time
+    if last_seen_start is not None:
+        params["lastSeenStart"] = last_seen_start
+    if last_seen_end is not None:
+        params["lastSeenEnd"] = last_seen_end
+    if last_seen_after is not None:
+        params["lastSeenAfter"] = last_seen_after
+    return client.get("/openapi/contacts/distribution", params)
 
 
 def get_contact(client: ApiClient, contact_id: int, lang: str = "cn"):
@@ -144,3 +201,24 @@ def query_csrs(client: ApiClient, keyword: Optional[str] = None, status: Optiona
 def get_csr(client: ApiClient, csr_id: int):
     """按 csrId 取单个客服信息（已脱敏）。"""
     return client.get(f"/openapi/csrs/{csr_id}", {})
+
+
+def query_call_logs(client: ApiClient, contact_id: Optional[int] = None,
+                    csr_id: Optional[int] = None, outcome: Optional[str] = None,
+                    start_time: Optional[int] = None, end_time: Optional[int] = None,
+                    page: int = 1, size: int = 50):
+    """外呼记录：客服在「外呼」Tab 拨打线索的明细。按 callAt 倒序。
+    outcome 取值：connected/no_answer/rejected/wrong_number/invalid。
+    时间为毫秒时间戳，均选填。"""
+    params = {"page": page, "size": size}
+    if contact_id is not None:
+        params["contactId"] = contact_id
+    if csr_id is not None:
+        params["csrId"] = csr_id
+    if outcome:
+        params["outcome"] = outcome
+    if start_time is not None:
+        params["startTime"] = start_time
+    if end_time is not None:
+        params["endTime"] = end_time
+    return client.get("/openapi/call-logs", params)

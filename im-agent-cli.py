@@ -92,8 +92,25 @@ def cmd_contacts(args):
     res = tools.query_contacts(
         client, csr_id=args.csr, keyword=args.keyword, stage=args.stage, user_area=args.area,
         start_time=_ts(args.start), end_time=_ts(args.end),
-        last_seen_after=_ts(args.last_seen_after), lang=args.lang,
-        page=args.page, size=args.size,
+        last_seen_start=_ts(args.last_seen_start), last_seen_end=_ts(args.last_seen_end),
+        last_seen_after=_ts(args.last_seen_after),
+        link_accounts=args.link_accounts, contact_id=args.id,
+        nick_name=args.nick, summary_keyword=args.summary,
+        lang=args.lang, page=args.page, size=args.size,
+    )
+    _print(res)
+
+
+def cmd_distribution(args):
+    client = ApiClient()
+    res = tools.query_contact_distribution(
+        client, csr_id=args.csr, keyword=args.keyword, stage=args.stage, user_area=args.area,
+        start_time=_ts(args.start), end_time=_ts(args.end),
+        last_seen_start=_ts(args.last_seen_start), last_seen_end=_ts(args.last_seen_end),
+        last_seen_after=_ts(args.last_seen_after),
+        link_accounts=args.link_accounts, contact_id=args.id,
+        nick_name=args.nick, summary_keyword=args.summary,
+        lang=args.lang,
     )
     _print(res)
 
@@ -112,6 +129,16 @@ def cmd_csrs(args):
 def cmd_csr(args):
     client = ApiClient()
     _print(tools.get_csr(client, csr_id=args.id))
+
+
+def cmd_call_logs(args):
+    client = ApiClient()
+    res = tools.query_call_logs(
+        client, contact_id=args.contact, csr_id=args.csr, outcome=args.outcome,
+        start_time=_ts(args.start), end_time=_ts(args.end),
+        page=args.page, size=args.size,
+    )
+    _print(res)
 
 
 def build_parser():
@@ -166,13 +193,36 @@ def build_parser():
     sp.add_argument("--keyword", help="模糊匹配 昵称/备注/手机号")
     sp.add_argument("--stage", help="stage_key 逗号分隔")
     sp.add_argument("--area", help="国家地区代码，如 CN")
+    sp.add_argument("--link-accounts", dest="link_accounts", type=int, help="WA 账号 ID")
+    sp.add_argument("--id", type=int, help="客户ID（精确匹配）")
+    sp.add_argument("--nick", help="昵称（模糊）")
+    sp.add_argument("--summary", help="会话总结关键字（模糊）")
     sp.add_argument("--start", help="firstSeen >= （时间戳或 yyyy-MM-dd HH:mm）")
     sp.add_argument("--end", help="firstSeen <= （时间戳或 yyyy-MM-dd HH:mm）")
-    sp.add_argument("--last-seen-after", dest="last_seen_after", help="lastSeen >= （时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--last-seen-start", dest="last_seen_start", help="lastSeen >= （时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--last-seen-end", dest="last_seen_end", help="lastSeen <= （时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--last-seen-after", dest="last_seen_after", help="兼容老入参，等价 --last-seen-start")
     sp.add_argument("--lang", default="cn", help="cn / en，影响 stageNames")
     sp.add_argument("--page", type=int, default=1)
     sp.add_argument("--size", type=int, default=50)
     sp.set_defaults(func=cmd_contacts)
+
+    sp = sub.add_parser("distribution", help="客户检索条件分布（stage/csr/area/needReply 4 段聚合）")
+    sp.add_argument("--csr", type=int, help="分配客服 csrId")
+    sp.add_argument("--keyword", help="模糊匹配 昵称/备注/手机号")
+    sp.add_argument("--stage", help="stage_key 逗号分隔")
+    sp.add_argument("--area", help="国家地区代码，如 CN")
+    sp.add_argument("--link-accounts", dest="link_accounts", type=int, help="WA 账号 ID")
+    sp.add_argument("--id", type=int, help="客户ID（精确匹配）")
+    sp.add_argument("--nick", help="昵称（模糊）")
+    sp.add_argument("--summary", help="会话总结关键字（模糊）")
+    sp.add_argument("--start", help="firstSeen >= （时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--end", help="firstSeen <= （时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--last-seen-start", dest="last_seen_start", help="lastSeen >= （时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--last-seen-end", dest="last_seen_end", help="lastSeen <= （时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--last-seen-after", dest="last_seen_after", help="兼容老入参，等价 --last-seen-start")
+    sp.add_argument("--lang", default="cn", help="cn / en")
+    sp.set_defaults(func=cmd_distribution)
 
     sp = sub.add_parser("contact", help="按 contactId 取客户详情")
     sp.add_argument("id", type=int, help="客户ID")
@@ -189,6 +239,16 @@ def build_parser():
     sp = sub.add_parser("csr", help="按 csrId 取客服信息")
     sp.add_argument("id", type=int, help="客服ID")
     sp.set_defaults(func=cmd_csr)
+
+    sp = sub.add_parser("call-logs", help="外呼记录（按客户/客服/通话结果/时间过滤）")
+    sp.add_argument("--contact", type=int, help="客户ID")
+    sp.add_argument("--csr", type=int, help="拨打客服 csrId")
+    sp.add_argument("--outcome", help="connected/no_answer/rejected/wrong_number/invalid")
+    sp.add_argument("--start", help="callAt >= （时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--end", help="callAt <= （时间戳或 yyyy-MM-dd HH:mm）")
+    sp.add_argument("--page", type=int, default=1)
+    sp.add_argument("--size", type=int, default=50)
+    sp.set_defaults(func=cmd_call_logs)
 
     return p
 
