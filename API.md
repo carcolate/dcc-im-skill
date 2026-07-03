@@ -40,6 +40,7 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 | csrId | long | 否 | 回复人 |
 | acceptMode | string | 否 | copilot_accept_mode 过滤，逗号分隔，如 `ACCEPT,MODIFIED` |
 | contactId | long | 否 | 客户ID |
+| keyword | string | 否 | 模糊匹配 textContent / copilotSuggestion |
 | page / size | int | 否 | 分页 |
 
 返回 `data[]` 字段：
@@ -210,6 +211,7 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 | tiktokNickname | TikTok 昵称 |
 | summaryContent | 会话总结 |
 | summaryAt | 总结生成时间（毫秒） |
+| source | 客户来源：`Initiative`=主动建联 / `TiktokLeads`=TikTok 留资 / `TiktokMessage`=TikTok 私信 |
 
 ---
 
