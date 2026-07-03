@@ -50,7 +50,7 @@ def cmd_replies(args):
     res = tools.query_replies(
         client, start_time=_ts(args.start), end_time=_ts(args.end),
         csr_id=args.csr, accept_mode=args.mode, contact_id=args.contact,
-        page=args.page, size=args.size,
+        keyword=args.keyword, page=args.page, size=args.size,
     )
     _print(res)
 
@@ -155,6 +155,7 @@ def build_parser():
     sp.add_argument("--csr", type=int, help="回复人 csrId")
     sp.add_argument("--mode", help="copilot_accept_mode 逗号分隔，如 ACCEPT,MODIFIED")
     sp.add_argument("--contact", type=int, help="客户ID")
+    sp.add_argument("--keyword", help="模糊匹配 textContent / copilotSuggestion")
     sp.add_argument("--page", type=int, default=1)
     sp.add_argument("--size", type=int, default=50)
     sp.set_defaults(func=cmd_replies)

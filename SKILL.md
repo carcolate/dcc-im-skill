@@ -44,6 +44,7 @@ python im-agent-cli.py contact 100023 --lang cn
 
 # 回复明细（必填起止时间）
 python im-agent-cli.py replies --start "2026-06-01 00:00" --end "2026-06-16 23:59" --csr 12 --mode ACCEPT,MODIFIED
+python im-agent-cli.py replies --start "2026-06-01 00:00" --end "2026-06-16 23:59" --keyword 价格
 
 # 消息明细（回复时效原始数据），只看某客户已回复的 inbound
 python im-agent-cli.py messages --start "2026-06-01 00:00" --end "2026-06-16 23:59" --direction inbound --has-reply true
@@ -77,7 +78,7 @@ python im-agent-cli.py call-logs --csr 12 --outcome no_answer
 - `query_contacts(...)` / `get_contact(id)`：搜索客户 / 取客户详情（定位 contactId）。
   扩展入参：`link_accounts`、`contact_id`(精确ID)、`nick_name`(模糊昵称)、`summary_keyword`、`last_seen_start/end`
 - `query_contact_distribution(...)`：按 contacts 同名筛选条件聚合，输出 `{total, stage[], csr[], area[], needReply[]}`，不分页
-- `query_replies(...)` / `query_messages(...)`：回复明细 / 消息时效原始数据
+- `query_replies(...)` / `query_messages(...)`：回复明细 / 消息时效原始数据。`query_replies` 支持 `keyword`（模糊匹配 textContent / copilotSuggestion）
 - `query_conversations(...)`：完整来往消息（inbound+outbound 对话流，含正文/媒体/copilot 痕迹）
 - `query_stage_logs(...)`：客户标签(stage)变更流水（stageFrom/stageTo 为标签数组，带客户昵称）
 - `query_call_logs(...)`：外呼记录（客服拨打线索明细，含 `outcome`/`remark`/`callAt`），用于接通率/外呼工作量等分析

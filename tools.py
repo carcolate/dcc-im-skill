@@ -43,7 +43,8 @@ def format_millis(ms: Optional[int], tz_offset_hours: int = 8) -> str:
 
 def query_replies(client: ApiClient, start_time: int, end_time: int,
                   csr_id: Optional[int] = None, accept_mode: Optional[str] = None,
-                  contact_id: Optional[int] = None, page: int = 1, size: int = 50):
+                  contact_id: Optional[int] = None, keyword: Optional[str] = None,
+                  page: int = 1, size: int = 50):
     """回复明细。start_time/end_time 为毫秒时间戳（必填）。"""
     params = {"startTime": start_time, "endTime": end_time, "page": page, "size": size}
     if csr_id is not None:
@@ -52,6 +53,8 @@ def query_replies(client: ApiClient, start_time: int, end_time: int,
         params["acceptMode"] = accept_mode
     if contact_id is not None:
         params["contactId"] = contact_id
+    if keyword:
+        params["keyword"] = keyword
     return client.get("/openapi/replies", params)
 
 
