@@ -45,7 +45,15 @@ def _platform_path(platform: str) -> str:
 
 def query_accounts(client: ApiClient, platform: str = "whatsapp"):
     """平台账号列表。"""
-    return client.get(f"{_platform_path(platform)}/accounts")
+    response = client.get(f"{_platform_path(platform)}/accounts")
+    data = response.get("data") if isinstance(response, dict) else None
+    rows = data if isinstance(data, list) else []
+    if isinstance(data, dict):
+        rows = data.get("records") or data.get("list") or data.get("rows") or []
+    for row in rows:
+        if isinstance(row, dict):
+            row.pop("provider", None)
+    return response
 
 
 def query_contacts(client: ApiClient, platform: str = "whatsapp",

@@ -458,7 +458,6 @@ V2 按平台拆分路由。路径前缀 `/openapi/v2/`。
 |------|------|
 | platform | 固定 `whatsapp` |
 | platformAccountId | 平台账号ID |
-| provider | 服务商 |
 | displayName | 展示名 |
 | externalAccountId | 外部账号ID |
 | enabled | 是否启用 |
