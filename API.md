@@ -54,14 +54,16 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 | username | 客户系统备注 |
 | csrId | 回复人ID |
 | csrName | 回复人名 |
+| platformAccountId | 平台账号ID |
+| platformAccountName | 平台账号名称 |
 | sendTime | 回复时间（毫秒；REJECTED 行为客户消息时间） |
 | sendTimeStr | sendTime 格式化（`yyyy-MM-dd HH:mm`） |
 | acceptMode | 回复形式：`ACCEPT`=无修改发送 / `MODIFIED`=修改后发送 / `MANUAL`=手动编写 / `REJECTED`=未发送 |
 | msgType | 消息类型 |
+| msgTypeLabel | 消息类型中文名称 |
 | direction | `outbound`=已发送回复 / `inbound`=被拒绝的客户触发消息 |
 | suggestionContent | 修改前内容（copilot 建议） |
 | sentContent | 实际发送内容（REJECTED 行为客户原文，无发送内容） |
-| taskUuid | copilot 任务 uuid（可关联同一次 copilot） |
 
 ---
 
@@ -89,6 +91,9 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 | username | 客户系统备注 |
 | direction | inbound / outbound |
 | msgType | 消息类型 |
+| msgTypeLabel | 消息类型中文名称 |
+| platformAccountId | 平台账号ID |
+| platformAccountName | 平台账号名称 |
 | csrId | 关联客服ID |
 | csrName | 客服名 |
 | sendTime | 消息时间（毫秒） |
@@ -100,7 +105,6 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 | textContent | 文本内容 |
 | acceptMode | copilot 回复形式（inbound 触发消息与 outbound 回复均带）：ACCEPT/MODIFIED/MANUAL/REJECTED |
 | suggestionContent | copilot 建议内容 |
-| taskUuid | copilot 任务 uuid |
 
 **指标算法**
 
@@ -133,6 +137,9 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 | username | 客户系统备注 |
 | direction | inbound / outbound |
 | msgType | 消息类型 |
+| msgTypeLabel | 消息类型中文名称 |
+| platformAccountId | 平台账号ID |
+| platformAccountName | 平台账号名称 |
 | csrId / csrName | 关联客服ID / 名 |
 | sendTime | 消息时间（毫秒） |
 | sendTimeStr | sendTime 格式化（`yyyy-MM-dd HH:mm`） |
@@ -140,7 +147,6 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 | imgLink | 图片链接（如有） |
 | acceptMode | copilot 回复形式（ACCEPT/MODIFIED/MANUAL/REJECTED） |
 | suggestionContent | copilot 建议内容 |
-| taskUuid | copilot 任务 uuid |
 | repliedAt | inbound 被回复时间（毫秒） |
 | repliedAtStr | repliedAt 格式化（`yyyy-MM-dd HH:mm`） |
 | waitSeconds | 首次回复时长（秒） |
@@ -156,6 +162,7 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 | contactId | long | 否 | 客户ID |
 | startTime | long | 否 | changedAt >= 毫秒时间戳 |
 | endTime | long | 否 | changedAt <= 毫秒时间戳 |
+| lang | string | 否 | `cn`（默认）/ `en`，影响标签名称 |
 | page / size | int | 否 | 分页 |
 
 返回 `data[]` 字段（按 changedAt 倒序）：
@@ -168,7 +175,9 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 | username | 客户系统备注 |
 | messageId | 触发本次变更的消息ID（可能为 null） |
 | stageFrom | 变更前标签 stage_key 数组（首次为空数组） |
+| stageFromNames | 变更前标签名称数组，与 `stageFrom` 顺序对应 |
 | stageTo | 变更后标签 stage_key 数组 |
+| stageToNames | 变更后标签名称数组，与 `stageTo` 顺序对应 |
 | changedAt | 变更时间（毫秒） |
 | changedAtStr | changedAt 格式化（`yyyy-MM-dd HH:mm`） |
 
@@ -208,6 +217,7 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 | userArea | 国家地区代码 |
 | assignedCsrId | 分配客服ID |
 | dealerId | 归属经销商ID（未绑定为 0） |
+| dealerName | 归属经销商名称 |
 | csrName | 分配客服名 |
 | linkAccounts | 来源 WA 账号 ID |
 | linkAccountLabel | 来源 WA 账号 label（accountName + 手机号） |
@@ -216,6 +226,7 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 | lastSeen | 最近沟通时间（毫秒） |
 | lastSeenStr | lastSeen 格式化（`yyyy-MM-dd HH:mm`） |
 | needReply | 状态：1=待回复 / 0=已回复 / -1=无需回复 |
+| needReplyLabel | 状态中文名称：待回复 / 已回复 / 无需回复 / 新客户 |
 | stages | 跟踪标签对象数组（见下方结构） |
 | stageUpdatedAt | 标签更新时间（毫秒） |
 | stageUpdatedAtStr | stageUpdatedAt 格式化（`yyyy-MM-dd HH:mm`） |
@@ -224,6 +235,7 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 | summaryAt | 总结生成时间（毫秒） |
 | summaryAtStr | summaryAt 格式化（`yyyy-MM-dd HH:mm`） |
 | source | 客户来源：`Initiative`=主动建联 / `TiktokLeads`=TikTok 留资 / `TiktokMessage`=TikTok 私信 |
+| sourceLabel | 客户来源中文名称 |
 
 `stages[]` 元素结构：
 
@@ -265,18 +277,9 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 | id | 客服ID（即各接口的 csrId） |
 | account | 登录账号 |
 | name | 姓名/昵称 |
-| phone | 手机号 |
-| email | 邮箱 |
 | dealerId | 归属经销商ID（未绑定为 0） |
+| dealerName | 归属经销商名称 |
 | status | 0=禁用 / 1=启用 |
-| isDefault | 是否默认客服 |
-| allowAutopilot | 是否允许 Autopilot |
-| wecomUserid / wecomNotify | 企微 userid / 通知开关 |
-| feishuUserid / feishuNotify | 飞书 user_id / 通知开关 |
-| larkUserid / larkNotify | Lark user_id / 通知开关 |
-| remark | 备注 |
-| createdAt | 创建时间（毫秒） |
-| createdAtStr | createdAt 格式化（`yyyy-MM-dd HH:mm`） |
 
 ---
 
@@ -462,6 +465,7 @@ V2 按平台拆分路由。路径前缀 `/openapi/v2/`。
 | externalAccountId | 外部账号ID |
 | enabled | 是否启用 |
 | assignMode | 分配模式 |
+| assignModeLabel | 分配模式中文名称：共享 / 抢占 / 指定客服 |
 | assignCsrId | 指定客服ID |
 | legacyWaAccountId | 旧 WA 账号ID |
 
@@ -500,17 +504,21 @@ V2 按平台拆分路由。路径前缀 `/openapi/v2/`。
 | userArea | 国家地区代码 |
 | assignedCsrId | 分配客服ID |
 | dealerId | 归属经销商 ID；`0` 或空值表示未下发 |
+| dealerName | 归属经销商名称 |
 | csrName | 分配客服名 |
 | linkAccounts | 来源 WA 账号 ID |
 | linkAccountLabel | 来源 WA 账号标签 |
+| platformAccountName | 平台账号名称 |
 | platformAccountLabel | 平台账号展示名（有值时才出现） |
 | firstSeen / firstSeenStr | 初次联系时间 |
 | lastSeen / lastSeenStr | 最近沟通时间 |
 | needReply | 1=待回复 / 0=已回复 / -1=无需回复 |
+| needReplyLabel | 状态中文名称：待回复 / 已回复 / 无需回复 / 新客户 |
 | stages | 标签对象数组 `[{stageKey, name, stageLevel}]` |
 | summaryContent | 会话总结 |
 | summaryAt / summaryAtStr | 总结时间 |
 | source | 客户来源 |
+| sourceLabel | 客户来源中文名称 |
 
 ### 客户详情 `GET /v2/whatsapp/contacts/{id}`
 
@@ -542,6 +550,8 @@ V2 按平台拆分路由。路径前缀 `/openapi/v2/`。
 | username | 客户备注 |
 | direction | inbound / outbound |
 | msgType | 消息类型 |
+| msgTypeLabel | 消息类型中文名称 |
+| platformAccountName | 平台账号名称 |
 | textContent | 文本内容 |
 | mediaUrl | 媒体链接 |
 | csrId / csrName | 客服ID / 名 |
@@ -553,7 +563,6 @@ V2 按平台拆分路由。路径前缀 `/openapi/v2/`。
 | externalMessageId | 外部消息ID |
 | acceptMode | copilot 回复形式 |
 | suggestionContent | copilot 建议 |
-| taskUuid | copilot 任务 UUID |
 
 `chatOnly=true` 返回精简字段：
 

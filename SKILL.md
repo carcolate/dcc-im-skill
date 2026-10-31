@@ -132,6 +132,9 @@ python im-agent-cli.py --platform tiktok messages --contact 200045 --start "2026
 - `acceptMode`：`ACCEPT`=无修改发送 / `MODIFIED`=修改后发送 / `MANUAL`=手动 / `REJECTED`=未发送
 - `needReply`：`1`=待回复 / `0`=已回复 / `-1`=无需回复
 - `stageLevel`：`H`/`A`/`B`/`C`/`D` 等级分类
+- `stages[].name` / `stageFromNames` / `stageToNames`：标签业务名称
+- `dealerName` / `csrName` / `platformAccountName`：对应 ID 的业务名称
+- `msgTypeLabel` / `sourceLabel` / `needReplyLabel` / `assignModeLabel`：中文业务文案
 
 ## 指标计算提示
 

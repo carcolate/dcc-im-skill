@@ -13,6 +13,28 @@ from api_client import ApiClient
 DEFAULT_TZ = timezone(timedelta(hours=8))
 
 
+def _strip_fields(response, fields):
+    """移除不面向使用者展示的旧版/内部字段。"""
+    if not isinstance(response, dict):
+        return response
+
+    data = response.get("data")
+    if isinstance(data, list):
+        rows = data
+    elif isinstance(data, dict):
+        rows = data.get("records") or data.get("list") or data.get("rows")
+        if not isinstance(rows, list):
+            rows = [data]
+    else:
+        rows = []
+
+    for row in rows:
+        if isinstance(row, dict):
+            for field in fields:
+                row.pop(field, None)
+    return response
+
+
 def parse_datetime(s: str, tz_offset_hours: int = 8) -> int:
     """把 'yyyy-MM-dd HH:mm' 或 'yyyy-MM-dd HH:mm:ss' 转成毫秒时间戳。
     也兼容只给日期 'yyyy-MM-dd'（按当天 00:00 处理）。"""
@@ -46,14 +68,7 @@ def _platform_path(platform: str) -> str:
 def query_accounts(client: ApiClient, platform: str = "whatsapp"):
     """平台账号列表。"""
     response = client.get(f"{_platform_path(platform)}/accounts")
-    data = response.get("data") if isinstance(response, dict) else None
-    rows = data if isinstance(data, list) else []
-    if isinstance(data, dict):
-        rows = data.get("records") or data.get("list") or data.get("rows") or []
-    for row in rows:
-        if isinstance(row, dict):
-            row.pop("provider", None)
-    return response
+    return _strip_fields(response, {"provider", "channel"})
 
 
 def query_contacts(client: ApiClient, platform: str = "whatsapp",
@@ -129,7 +144,8 @@ def query_messages(client: ApiClient, contact_id: int,
         params["hasReply"] = "true" if has_reply else "false"
     if chat_only:
         params["chatOnly"] = "true"
-    return client.get(f"{_platform_path(platform)}/messages", params)
+    response = client.get(f"{_platform_path(platform)}/messages", params)
+    return _strip_fields(response, {"taskUuid"})
 
 
 def query_replies(client: ApiClient, start_time: int, end_time: int,
@@ -148,7 +164,8 @@ def query_replies(client: ApiClient, start_time: int, end_time: int,
         params["acceptMode"] = accept_mode
     if keyword:
         params["keyword"] = keyword
-    return client.get(f"{_platform_path(platform)}/replies", params)
+    response = client.get(f"{_platform_path(platform)}/replies", params)
+    return _strip_fields(response, {"taskUuid"})
 
 
 def query_efficiency(client: ApiClient, start_time: int, end_time: int,
