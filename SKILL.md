@@ -12,7 +12,7 @@ description: 通过命令行查询 Carcolate-IM V2 OpenAPI（客户 / 消息 / �
 1. 安装依赖：`pip install -r requirements.txt`
 2. 配置环境变量（或复制 `.env.example` 为 `.env`）：
   - `IM_API_BASE_URL`：接口基础地址，如 `https://host`，不带末尾斜杠
-  - `IM_API_KEY`：来自 `tb_openapi_key.api_key`，请求头 `X-Api-Key` 使用
+  - `IM_API_KEY`：管理员记录中的 API Key，请求头使用 `X-Api-Key`
 
 所有接口入参时间均为**毫秒时间戳**。CLI 的 `--start/--end` 等参数同时接受纯数字时间戳或 `yyyy-MM-dd HH:mm` 字符串（按东八区解析）。
 

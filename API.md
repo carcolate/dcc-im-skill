@@ -5,10 +5,11 @@
 所有接口路径前缀 `/openapi/`，请求头携带：
 
 ```
-X-Api-Key: <tb_openapi_key.api_key>
+X-Api-Key: <tb_admin_user.api_key>
 ```
 
-key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
+API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该 Key 也不可用。
+接口返回的数据沿用该管理员的经销商和可见平台账号范围。
 
 ## 通用约定
 
@@ -206,6 +207,7 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 | phoneNumber | 电话 |
 | userArea | 国家地区代码 |
 | assignedCsrId | 分配客服ID |
+| dealerId | 归属经销商ID（未绑定为 0） |
 | csrName | 分配客服名 |
 | linkAccounts | 来源 WA 账号 ID |
 | linkAccountLabel | 来源 WA 账号 label（accountName + 手机号） |
@@ -265,9 +267,9 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 | name | 姓名/昵称 |
 | phone | 手机号 |
 | email | 邮箱 |
+| dealerId | 归属经销商ID（未绑定为 0） |
 | status | 0=禁用 / 1=启用 |
 | isDefault | 是否默认客服 |
-| manage | 是否管理员 |
 | allowAutopilot | 是否允许 Autopilot |
 | wecomUserid / wecomNotify | 企微 userid / 通知开关 |
 | feishuUserid / feishuNotify | 飞书 user_id / 通知开关 |
@@ -305,7 +307,6 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 | nameEn | 英文名称 |
 | stageLevel | 等级分类（如 `H`/`A`/`B`/`C`/`D`） |
 | sortOrder | 排序权重，数字越小越靠前 |
-| abandoned | 是否终态标签：`1`=打上后不再纳入"待处理" |
 
 ---
 
@@ -436,17 +437,12 @@ key 无效或被禁用返回 `{ "code": 500203, "msg": "无效的 API Key" }`。
 
 # V2 多平台接口
 
-V2 按平台拆分路由，支持 Scope 鉴权。路径前缀 `/openapi/v2/`。
+V2 按平台拆分路由。路径前缀 `/openapi/v2/`。
 
-## 鉴权与 Scope
+## 鉴权与数据范围
 
-V2 使用 `@OpenApiScope` 注解控制权限粒度：
-
-| Scope | 说明 |
-|------|------|
-| `whatsapp:read` | WhatsApp 接口读权限 |
-| `tiktok:read` | TikTok 接口读权限 |
-| `common:read` | 通用接口读权限 |
+所有接口使用管理员记录中的 API Key 鉴权，不再配置独立 API Scope。
+接口数据范围沿用该管理员绑定的经销商和可见平台账号。
 
 ---
 
@@ -454,7 +450,7 @@ V2 使用 `@OpenApiScope` 注解控制权限粒度：
 
 ### 平台账号列表 `GET /v2/whatsapp/accounts`
 
-返回当前 API Key 可见的 WhatsApp 平台账号。
+返回当前管理员可见的 WhatsApp 平台账号。
 
 返回 `data[]` 字段：
 
@@ -590,7 +586,7 @@ V2 使用 `@OpenApiScope` 注解控制权限粒度：
 
 ### 客服列表 `GET /v2/common/csrs`
 
-返回当前 API Key 绑定的平台账号可见的客服。
+返回当前管理员可见平台账号范围内绑定的客服。
 
 | 字段 | 说明 |
 |------|------|
@@ -611,7 +607,6 @@ V2 使用 `@OpenApiScope` 注解控制权限粒度：
 | name | 按 lang 翻译后的名称 |
 | stageLevel | 等级分类 |
 | sortOrder | 排序权重 |
-| abandoned | 是否终态标签 |
 
 ### DCC 统计 `GET /v2/common/dcc/stats`
 
