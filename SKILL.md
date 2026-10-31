@@ -20,6 +20,17 @@ description: 通过命令行查询 Carcolate-IM V2 OpenAPI（客户 / 消息 / �
 
 - `--platform whatsapp|tiktok`（默认 `whatsapp`）：选择平台
 
+## 查询前先确认可见平台账号（重要）
+
+查询联系人、消息或其他平台数据前，先查询当前 API Key 可见的平台账号：
+
+```bash
+python im-agent-cli.py accounts
+python im-agent-cli.py --platform tiktok accounts
+```
+
+如果 WhatsApp 账号列表为空，就跳过所有 WhatsApp 查询；如果 TikTok 账号列表为空，就跳过所有 TikTok 查询。跨平台任务只查询有可见账号的平台，并在结果中说明被跳过的平台，避免无效请求、节省时间。
+
 ## 先定位 ID（重要）
 
 `messages` / `replies` / `efficiency` 的 `--csr` 以及 `messages` 的 `--contact` 需要的是**数字 ID**。先搜索定位：
