@@ -471,6 +471,8 @@ V2 按平台拆分路由。路径前缀 `/openapi/v2/`。
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | csrId | long | 否 | 分配客服 |
+| dealerId | long | 否 | 精确筛选经销商 ID |
+| dealerAssigned | boolean | 否 | `true` 只返回已下发线索（已绑定经销商），即 `dealerId > 0` |
 | keyword | string | 否 | 模糊匹配昵称/备注/手机号 |
 | stage | string | 否 | stageKey 逗号分隔 |
 | stageLevel | string | 否 | 按等级过滤（如 `H`/`A`/`B`/`C`/`D`） |
@@ -498,6 +500,7 @@ V2 按平台拆分路由。路径前缀 `/openapi/v2/`。
 | phoneNumber | 电话 |
 | userArea | 国家地区代码 |
 | assignedCsrId | 分配客服ID |
+| dealerId | 归属经销商 ID；`0` 或空值表示未下发 |
 | csrName | 分配客服名 |
 | linkAccounts | 来源 WA 账号 ID |
 | linkAccountLabel | 来源 WA 账号标签 |
@@ -578,7 +581,7 @@ V2 按平台拆分路由。路径前缀 `/openapi/v2/`。
 
 ## V2 TikTok 接口 `/openapi/v2/tiktok`
 
-接口结构与 V2 WhatsApp **完全一致**，仅路径前缀不同。contacts 返回额外带 `tiktokNickname` 字段。
+接口结构与 V2 WhatsApp **完全一致**，仅路径前缀不同。contacts 返回额外带 `tiktokNickname` 字段；同样支持 `dealerId` 和 `dealerAssigned`，其中已下发定义为 `dealerId > 0`。
 
 ---
 

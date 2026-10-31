@@ -58,11 +58,17 @@ def query_contacts(client: ApiClient, platform: str = "whatsapp",
                    platform_account_id: Optional[int] = None,
                    contact_id: Optional[int] = None,
                    nick_name: Optional[str] = None, summary_keyword: Optional[str] = None,
-                   lang: str = "cn", page: int = 1, size: int = 50):
+                   lang: str = "cn", page: int = 1, size: int = 50,
+                   dealer_id: Optional[int] = None,
+                   dealer_assigned: Optional[bool] = None):
     """客户明细 / 搜索。"""
     params = {"lang": lang, "page": page, "size": size}
     if csr_id is not None:
         params["csrId"] = csr_id
+    if dealer_id is not None:
+        params["dealerId"] = dealer_id
+    if dealer_assigned is not None:
+        params["dealerAssigned"] = "true" if dealer_assigned else "false"
     if keyword:
         params["keyword"] = keyword
     if stage:

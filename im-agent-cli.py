@@ -58,6 +58,8 @@ def cmd_contacts(args):
     _print(tools.query_contacts(
         ApiClient(), platform=args.platform,
         csr_id=args.csr, keyword=args.keyword,
+        dealer_id=args.dealer_id,
+        dealer_assigned=args.distributed,
         stage=args.stage, stage_level=args.stage_level,
         user_area=args.area,
         start_time=_ts(args.start), end_time=_ts(args.end),
@@ -140,6 +142,10 @@ def build_parser():
 
     sp = sub.add_parser("contacts", help="客户明细 / 搜索")
     sp.add_argument("--csr", type=int, help="分配客服 csrId")
+    sp.add_argument("--dealer-id", dest="dealer_id", type=int,
+                    help="经销商 ID（精确）")
+    sp.add_argument("--distributed", action="store_true",
+                    help="只查询已下发线索（已绑定经销商），即 dealerId > 0")
     sp.add_argument("--keyword", help="模糊匹配 昵称/备注/手机号")
     sp.add_argument("--stage", help="stageKey 逗号分隔")
     sp.add_argument("--stage-level", dest="stage_level", help="按等级过滤（H/A/B/C/D）")

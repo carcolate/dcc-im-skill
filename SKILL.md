@@ -22,7 +22,7 @@ description: 通过命令行查询 Carcolate-IM V2 OpenAPI（客户 / 消息 / �
 
 ## 先定位 ID（重要）
 
-`messages` / `replies` 的 `--csr` / `--contact` 需要的是**数字 ID**。先搜索定位：
+`messages` / `replies` / `efficiency` 的 `--csr` 以及 `messages` 的 `--contact` 需要的是**数字 ID**。先搜索定位：
 
 ```bash
 python im-agent-cli.py csrs
@@ -35,7 +35,7 @@ python im-agent-cli.py contacts --keyword 138
 |------|------|
 | `ts` | 时间字符串转毫秒时间戳 |
 | `accounts` | 平台账号列表 |
-| `contacts` | 客户明细 / 搜索（支持 stageLevel 等级过滤） |
+| `contacts` | 客户明细 / 搜索（支持 stageLevel、经销商和已下发过滤） |
 | `contact` | 按 contactId 取客户详情 |
 | `messages` | 消息明细（contactId 必传，无分页，支持 `--chat-only`） |
 | `replies` | 回复明细 |
@@ -65,6 +65,9 @@ python im-agent-cli.py stages --lang cn
 python im-agent-cli.py contacts --stage-level H --area CN
 python im-agent-cli.py contacts --keyword 13800000000
 python im-agent-cli.py contacts --stage ice_breaking,deal --start "2026-01-01 00:00"
+# 已下发线索：已绑定经销商，即 dealerId > 0
+python im-agent-cli.py contacts --distributed
+python im-agent-cli.py contacts --dealer-id 12
 
 # 客户详情
 python im-agent-cli.py contact 100023
@@ -97,7 +100,7 @@ python im-agent-cli.py --platform tiktok messages --contact 200045 --start "2026
 - `parse_datetime("yyyy-MM-dd HH:mm") -> int`：转毫秒时间戳
 - `format_millis(ms) -> str`：毫秒时间戳转可读字符串
 - `query_accounts(platform)`：平台账号列表
-- `query_contacts(platform, ...)`：客户搜索（支持 `stage_level` 按等级过滤）
+- `query_contacts(platform, ...)`：客户搜索（支持 `stage_level`、`dealer_id`、`dealer_assigned`）
 - `get_contact(contact_id, platform)`：客户详情
 - `query_messages(contact_id, start_time, end_time, ..., chat_only)`：消息明细（contactId 必传，chatOnly 精简模式）
 - `query_replies(...)`：回复明细
@@ -111,7 +114,9 @@ python im-agent-cli.py --platform tiktok messages --contact 200045 --start "2026
 
 - `direction`：`inbound`=客户发来 / `outbound`=企业发出
 - `csrId` / `repliedByCsrId`：`-1`=自动驾驶 / `0`=共享池 / `>0`=客服ID
-- `assignedCsrId`：`0`=共享池 / `-1`=可抢占 / `>0`=已分配
+- `assignedCsrId`：`0`=共享池 / `-1`=可抢占 / `>0`=已分配客服
+- `dealerId`：经销商 ID，`0` 或空值=未下发，`>0`=已下发
+- **口径**：下发指已绑定经销商（`dealerId > 0`）；分配指已分配客服（`assignedCsrId > 0`）。`assignedCsrId` 不用于判断是否下发。使用 `contacts --distributed` 过滤已下发线索。
 - `linkAccounts`：`null`/`0`=未建联 / `>0`=已建联WA账号ID
 - `acceptMode`：`ACCEPT`=无修改发送 / `MODIFIED`=修改后发送 / `MANUAL`=手动 / `REJECTED`=未发送
 - `needReply`：`1`=待回复 / `0`=已回复 / `-1`=无需回复
