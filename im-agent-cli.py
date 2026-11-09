@@ -46,17 +46,28 @@ def _print(obj):
     print(json.dumps(obj, ensure_ascii=False, indent=2))
 
 
+def _confirm(message):
+    if not sys.stdin.isatty() or not sys.stderr.isatty():
+        raise ApiError(f"需要人工确认，非交互模式不会重试：{message}", code=22)
+    print(f"{message} [y/N] ", end="", file=sys.stderr, flush=True)
+    return sys.stdin.readline().strip().lower() in ("y", "yes")
+
+
+def _client():
+    return ApiClient(confirm=_confirm)
+
+
 def cmd_ts(args):
     _print({"input": args.datetime, "millis": tools.parse_datetime(args.datetime)})
 
 
 def cmd_accounts(args):
-    _print(tools.query_accounts(ApiClient(), platform=args.platform))
+    _print(tools.query_accounts(_client(), platform=args.platform))
 
 
 def cmd_contacts(args):
     _print(tools.query_contacts(
-        ApiClient(), platform=args.platform,
+        _client(), platform=args.platform,
         csr_id=args.csr, keyword=args.keyword,
         dealer_id=args.dealer_id,
         dealer_assigned=args.distributed,
@@ -72,7 +83,7 @@ def cmd_contacts(args):
 
 
 def cmd_contact(args):
-    _print(tools.get_contact(ApiClient(), contact_id=args.id,
+    _print(tools.get_contact(_client(), contact_id=args.id,
                              platform=args.platform, lang=args.lang))
 
 
@@ -81,7 +92,7 @@ def cmd_messages(args):
     if args.has_reply is not None:
         has_reply = args.has_reply.lower() in ("1", "true", "yes", "y")
     _print(tools.query_messages(
-        ApiClient(), contact_id=args.contact,
+        _client(), contact_id=args.contact,
         start_time=_ts(args.start), end_time=_ts(args.end),
         platform=args.platform, csr_id=args.csr,
         direction=args.direction, has_reply=has_reply,
@@ -91,7 +102,7 @@ def cmd_messages(args):
 
 def cmd_replies(args):
     _print(tools.query_replies(
-        ApiClient(), start_time=_ts(args.start), end_time=_ts(args.end),
+        _client(), start_time=_ts(args.start), end_time=_ts(args.end),
         platform=args.platform, csr_id=args.csr, contact_id=args.contact,
         accept_mode=args.mode, keyword=args.keyword,
         page=args.page, size=args.size,
@@ -100,7 +111,7 @@ def cmd_replies(args):
 
 def cmd_efficiency(args):
     _print(tools.query_efficiency(
-        ApiClient(), start_time=_ts(args.start), end_time=_ts(args.end),
+        _client(), start_time=_ts(args.start), end_time=_ts(args.end),
         platform=args.platform, csr_id=args.csr,
         page=args.page, size=args.size,
     ))
@@ -108,22 +119,22 @@ def cmd_efficiency(args):
 
 def cmd_distribution(args):
     _print(tools.query_distribution(
-        ApiClient(), platform=args.platform,
+        _client(), platform=args.platform,
         csr_id=args.csr, stage=args.stage, stage_level=args.stage_level,
         platform_account_id=args.platform_account_id, lang=args.lang,
     ))
 
 
 def cmd_csrs(args):
-    _print(tools.query_csrs(ApiClient()))
+    _print(tools.query_csrs(_client()))
 
 
 def cmd_stages(args):
-    _print(tools.query_stages(ApiClient(), lang=args.lang))
+    _print(tools.query_stages(_client(), lang=args.lang))
 
 
 def cmd_dcc(args):
-    _print(tools.query_dcc_stats(ApiClient(), start_time=_ts(args.start), end_time=_ts(args.end)))
+    _print(tools.query_dcc_stats(_client(), start_time=_ts(args.start), end_time=_ts(args.end)))
 
 
 

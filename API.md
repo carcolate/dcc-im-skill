@@ -23,6 +23,12 @@ API Key 在后台管理员记录中创建或轮换；管理员被禁用后，该
 
 - 分页：`page`（默认 1）、`size`（默认 50）；`total` 为符合条件的总数。
 
+### CLI 响应与确认
+
+CLI 在请求层统一处理 `Rsp`：成功保留原始响应及 `total`，失败抛出 `ApiError` 并以非零状态退出，调用方无需自行判断 `code`。`code=1` 最多自动重试一次；`20` 中断请求；`21` 在标准错误输出消息；`22` 在交互终端询问确认，确认后带确认头重试。确认问题和重试次数有上限。
+
+非交互模式不会自动确认，也不会等待输入：需要确认时直接报错退出。Python 代码直接使用 `ApiClient` 时同样默认不自动确认；如确需交互，可显式传入 `confirm` 回调。异常的 `code`、`payload` 和 `cancelled` 可供程序识别；成功 JSON 保持在标准输出，提示和错误输出到标准错误。
+
 > **定位 ID**：调用方/AI 通常只知道客服名或客户名/手机号，不知道 `csrId` / `contactId`。
 > 先用 `GET /openapi/csrs?keyword=张三` 或 `GET /openapi/contacts?keyword=138xxxx` 搜出来拿到 id，
 > 再传给其它接口（replies / messages 的 `csrId` / `contactId`）。
